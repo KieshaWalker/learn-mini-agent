@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini AI Chat</title>
+    <!-- Use React and Babel via CDNs to avoid any build tools -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Use modern Babel v7 standalone -->
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; margin: 0; padding: 24px; background: #f5f6fa; }
+      .container { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,0.06); overflow: hidden; }
+      header { padding: 16px 20px; background: #3b82f6; color: white; font-weight: 600; }
+      .chat { padding: 16px 20px; height: 420px; overflow-y: auto; }
+      .msg { margin: 10px 0; display: flex; }
+      .msg.you { justify-content: flex-end; }
+      .bubble { max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.35; }
+      .you .bubble { background: #e5edff; }
+      .bot .bubble { background: #f1f5f9; }
+      form { display: flex; gap: 8px; padding: 16px; border-top: 1px solid #eef2f7; }
+      input[type="text"] { flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 10px; }
+      button { padding: 10px 16px; border: none; border-radius: 10px; background: #3b82f6; color: white; font-weight: 600; cursor: pointer; }
+      button:disabled { opacity: 0.6; cursor: default; }
+      .tip { color: #64748b; font-size: 12px; padding: 0 20px 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+  <!-- Transpile only JSX; rely on modern browser for ES features (async/await, etc.) -->
+  <script type="text/babel" data-presets="react">
+      const { useState, useRef, useEffect } = React;
+
+      function App() {
+        const [messages, setMessages] = useState([
+          { who: 'bot', text: 'Hello! Ask me something. Type \'exit\' to see how the CLI would quit.' }
+        ]);
+        const [text, setText] = useState('');
+        const [busy, setBusy] = useState(false);
+        const chatRef = useRef(null);
+
+        useEffect(() => {
+          // Auto-scroll to bottom when messages change
+          if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;
+          }
+        }, [messages]);
+
+        async function send(e) {
+          e.preventDefault();
+          const trimmed = text.trim();
+          if (!trimmed) return;
+          setText('');
+          setMessages((m) => [...m, { who: 'you', text: trimmed }]);
+          setBusy(true);
+          try {
+            const res = await fetch('/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: trimmed })
+            });
+            const data = await res.json();
+            const reply = (data && Object.prototype.hasOwnProperty.call(data, 'reply')) ? data.reply : 'No reply';
+            setMessages((m) => [...m, { who: 'bot', text: reply }]);
+          } catch (err) {
+            setMessages((m) => [...m, { who: 'bot', text: 'Error contacting server.' }]);
+          } finally {
+            setBusy(false);
+          }
+        }
+
+        return (
+          <div className="container">
+            <header>Mini AI Chat</header>
+            <div className="chat" ref={chatRef}>
+              {messages.map((m, i) => (
+                <div key={i} className={`msg ${m.who}`}>
+                  <div className="bubble">{m.text}</div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={send}>
+              <input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Say hello, tell me your name, ask about weather..."
+              />
+              <button disabled={busy} type="submit">Send</button>
+            </form>
+            <div className="tip">Tip: Edit <code>data/intents.yml</code> to teach new responses.</div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+## intents.yml
+## ------------
+## This file defines the chatbot's knowledge in a simple format:
+## - default_response: what to say when no intent matches
+## - intents: a list of entries where each has:
+##     name: a short identifier (no spaces)
+##     patterns: regex patterns that should match user input (case-insensitive)
+##     responses: possible replies; one is chosen at random
+##
+## TIP: When writing regex with backslashes (\), prefer single quotes in YAML.
+## For example: use 'good\\s*morning' instead of "good\s*morning".
+
+default_response: "I'm not sure I understand. Could you rephrase?"
+
+intents:
+  - name: greeting
+    # Trigger on common greetings. The patterns below are regular expressions.
+    patterns:
+      - '^hi$'
+      - '^hello$'
+      - 'hey'
+      - 'good\\s*(morning|afternoon|evening)'
+    responses:
+      - "Hello! How can I help today?"
+      - "Hey there! What would you like to know?"
+
+  - name: goodbye
+    # Trigger on farewell messages
+    patterns:
+      - "^bye$"
+      - "goodbye"
+      - "see you"
+    responses:
+      - "Goodbye! Have a great day."
+      - "See you later!"
+
+  - name: name_intro
+    # If the user tells us their name, we try to extract it and use it in a reply.
+    patterns:
+      - 'my name is'
+      - "i am [A-Za-z]+"
+      - "i'm [A-Za-z]+"
+    responses:
+      - "Nice to meet you, {name}!"
+      - "Great to meet you, {name}."
+
+  - name: weather
+    # Very simple weather intent; we don't use a real API here.
+    patterns:
+      - "weather"
+      - "is it (raining|sunny|snowing)"
+    responses:
+      - "I'm a tiny bot and don't have live weather, but you can check your local forecast app."
+
+  - name: time
+    # Ask for the current time
+    patterns:
+      - 'what time is it\??'
+      - 'current time'
+      - 'tell me the time'
+    responses:
+      - "It's {time}."
+
+  - name: fallback
+    # The fallback intent should be last; it matches anything (catch-all)
+    patterns:
+      - ".*"
+    responses:
+      - "I'm not sure I got that."
+      - "I'm not sure I understand. Could you rephrase?"

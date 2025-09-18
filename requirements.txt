@@ -1,0 +1,5 @@
+# Dependencies for the mini AI chatbot
+# PyYAML: used to read the intents.yml file
+PyYAML>=6.0,<7
+fastapi>=0.110,<1
+uvicorn>=0.23,<1

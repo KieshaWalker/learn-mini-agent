@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+*.log
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# VS Code
+.vscode/
+
+# Environment files (keep secrets local)
+.env
+.env.*
+
+# Node/Frontend (if added later)
+node_modules/
+.cache/
+.coverage
+.DS_Store
